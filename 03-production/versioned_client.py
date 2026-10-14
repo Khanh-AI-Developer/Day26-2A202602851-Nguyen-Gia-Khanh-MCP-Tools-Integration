@@ -1,8 +1,9 @@
-"""Client test cho versioned_server.py — gọi cả tool v1, v2 và đọc server metadata."""
-
 import asyncio
 import json
 import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
