@@ -1,8 +1,24 @@
+import os
+import sys
+from pathlib import Path
 from typing import Any
 import asyncio
 import httpx
-import os
 from mcp.server.fastmcp import FastMCP
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+# Tự động nạp .env từ thư mục hiện tại hoặc thư mục gốc repo
+try:
+    from dotenv import load_dotenv
+    root_env = Path(__file__).resolve().parent.parent.parent / ".env"
+    if root_env.exists():
+        load_dotenv(dotenv_path=root_env)
+    else:
+        load_dotenv()
+except ImportError:
+    pass
 
 # Initialize FastMCP server
 port = int(os.getenv("PORT", 8085))
@@ -12,8 +28,14 @@ mcp = FastMCP("weather", host="0.0.0.0", port=port)
 WEATHERAPI_BASE = "https://api.weatherapi.com/v1"
 USER_AGENT = "weather-app/1.0"
 
-# Get API key from environment variable
-API_KEY = os.getenv("WEATHERAPI_KEY")
+os.environ.setdefault("PORT", "8085")
+
+# Get API key from environment variable (hỗ trợ các biến thể WEATHER_API_KEY, WEATHERAPI_KEY, WEATHER_APIKEY)
+API_KEY = (
+    os.getenv("WEATHER_API_KEY")
+    or os.getenv("WEATHERAPI_KEY")
+    or os.getenv("WEATHER_APIKEY")
+)
 
 async def make_weather_request(endpoint: str, params: dict[str, str]) -> dict[str, Any] | None:
     """Make a request to the WeatherAPI with proper error handling."""
